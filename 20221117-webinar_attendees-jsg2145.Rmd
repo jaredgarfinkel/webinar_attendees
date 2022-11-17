@@ -9,6 +9,7 @@ output: html_document
 library(tidyverse)
 library(rvest)
 library(httr)
+library(RSelenium)
 knitr::opts_chunk$set(
 	echo = TRUE,
 	warning = FALSE,
@@ -26,8 +27,74 @@ theme_set(theme_minimal() + theme(legend.position = "bottom"))
 ```
 
 ```{r}
-url = "https://authentication.logmeininc.com/login?service=https%3A%2F%2Fauthentication.logmeininc.com%2Foauth%2Fapprove%3Fclient_id%3Ddc09563b-c2f3-4156-8d5c-4747b8bdf2ad%26response_type%3Dtoken%26redirect_uri%3Dhttps%253A%252F%252Fdashboard.gotowebinar.com%252Fauthenticate.html%26state%3D%257B%2522path%2522%253A%2522https%253A%252F%252Fdashboard.gotowebinar.com%252F%2522%257D%26login_theme%3Dg2w&theme=g2w"
+# url = "https://authentication.logmeininc.com/login?service=https%3A%2F%2Fauthentication.logmeininc.com%2Foauth%2Fapprove%3Fclient_id%3Ddc09563b-c2f3-4156-8d5c-4747b8bdf2ad%26response_type%3Dtoken%26redirect_uri%3Dhttps%253A%252F%252Fdashboard.gotowebinar.com%252Fauthenticate.html%26state%3D%257B%2522path%2522%253A%2522https%253A%252F%252Fdashboard.gotowebinar.com%252F%2522%257D%26login_theme%3Dg2w&theme=g2w"
+
+url2 = "https://dashboard.gotowebinar.com/"
 ```
+
+### RSelenium
+
+```{r}
+remDr <- RSelenium::remoteDriver(remoteServerAddr = "localhost",
+                                 port = 4445L,
+                                 browserName = "chrome")
+remDr$open()
+```
+
+```{r}
+remDr$navigate(url2)
+remDr$screenshot(display = TRUE) # login form
+```
+
+#### login
+
+##### Enter Email
+
+```{r}
+email = remDr$findElement(using = "css", value= "#emailAddress")
+email$sendKeysToElement(list("maia.c@nymc.org"))
+# Next Button
+next_b <- remDr$findElement(using = "css", "#next-button")
+next_b$clickElement()
+```
+
+##### Enter Password
+
+```{r}
+pw = remDr$findElement(using = "css", value= "#password")
+pw$sendKeysToElement(list("NyMc6809!!"))
+# Submit
+submit_b <- remDr$findElement(using = "css", "#submit")
+submit_b$clickElement()
+```
+
+#### Go to the Analytics Web Page
+
+```{r}
+remDr$navigate("https://analytics.gotowebinar.com/analytics/sessions")
+# remDr$screenshot(display = TRUE) # analytics page, check
+```
+
+#### Click the most recent webinar
+
+"Fall Series"
+
+##### Extract the names of the webinars
+
+```{r}
+past_webinars = remDr$findElements(using = "css", ".stickyName a")
+# output = NULL
+# for (i in 1:length(past_webinars)) {
+#   output[[i]] = past_webinars$getElementText()[[i]]
+# }
+
+names = map(past_webinars, ~.$getElementText()[[1]]) # list of webinars, check
+# past_webinars$getElementText()[[1]]
+```
+
+
+
+### rvest
 
 ```{r}
 sess = session(url)
