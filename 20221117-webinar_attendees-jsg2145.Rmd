@@ -1,0 +1,76 @@
+---
+title: "20221117-webinar_attendees-jsg2145"
+author: "Jared Garfinkel"
+date: '2022-11-17'
+output: html_document
+---
+
+```{r}
+library(tidyverse)
+library(rvest)
+library(httr)
+knitr::opts_chunk$set(
+	echo = TRUE,
+	warning = FALSE,
+	fig.width = 8, 
+  fig.height = 6,
+  out.width = "90%"
+)
+options(
+  ggplot2.continuous.colour = "viridis",
+  ggplot2.continuous.fill = "viridis"
+)
+scale_colour_discrete = scale_colour_viridis_d
+scale_fill_discrete = scale_fill_viridis_d
+theme_set(theme_minimal() + theme(legend.position = "bottom"))
+```
+
+```{r}
+url = "https://authentication.logmeininc.com/login?service=https%3A%2F%2Fauthentication.logmeininc.com%2Foauth%2Fapprove%3Fclient_id%3Ddc09563b-c2f3-4156-8d5c-4747b8bdf2ad%26response_type%3Dtoken%26redirect_uri%3Dhttps%253A%252F%252Fdashboard.gotowebinar.com%252Fauthenticate.html%26state%3D%257B%2522path%2522%253A%2522https%253A%252F%252Fdashboard.gotowebinar.com%252F%2522%257D%26login_theme%3Dg2w&theme=g2w"
+```
+
+```{r}
+sess = session(url)
+sess
+```
+
+```{r}
+form = html_form(sess)[[1]]
+# str(form)
+filled_form = html_form_set(form, 
+                emailAddress = "maia.c@nymc.org",
+                password = "NyMc6809!!")
+session_submit(sess, filled_form)
+# submit_form()
+```
+
+```{r}
+sess_a = sess %>% 
+  session_jump_to("https://analytics.gotowebinar.com/analytics/sessions")
+# sess_a
+```
+
+```{r}
+html = read_html(sess_a)
+
+html %>% 
+  html_elements("body") %>% 
+  html_text2()
+
+rD = RSelenium::remoteDriver(browser = "chrome")
+remDr = rD[["client"]]
+remDr$navigate(url)
+remDr$open()
+
+head(remDr$sessionInfo)
+```
+
+
+```{r}
+sess_a %>%
+  html_element("a") %>% 
+  html_text()
+```
+
+
+
