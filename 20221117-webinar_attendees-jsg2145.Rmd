@@ -81,7 +81,7 @@ remDr$navigate("https://analytics.gotowebinar.com/analytics/sessions")
 
 ##### Extract the names of the webinars
 
-```{r}
+```{r, eval = FALSE, include = FALSE}
 past_webinars = remDr$findElements(using = "css", ".stickyName a")
 # output = NULL
 # for (i in 1:length(past_webinars)) {
@@ -91,6 +91,83 @@ past_webinars = remDr$findElements(using = "css", ".stickyName a")
 names = map(past_webinars, ~.$getElementText()[[1]]) # list of webinars, check
 # past_webinars$getElementText()[[1]]
 ```
+
+###### Example of a link click
+
+```{r}
+webinar1 = remDr$findElement(using = "css", value = ".rt-tr-group:nth-child(1) a")
+webinar1$clickElement()
+# remDr$screenshot(display = TRUE) # most recent webinar, check
+# body_content = remDr$findElement(using = "css", value = ".contentBody")
+# page_text = body_content$getElementText()[[1]] %>% 
+#   str_split("\\n")
+# 
+# length(page_text[[1]]) # 574 entries, 1st page only
+  
+```
+
+###### Do something (grab emails)
+
+```{r}
+webinar1_email_obj = remDr$findElements(using = "css", value = ".rt-td a")
+webinar_email_list = map(webinar1_email_obj, ~.$getElementText()[[1]])
+webinar_email_list
+```
+
+
+###### Click the next tab of the webinar attendees
+
+```{r}
+tabs = remDr$findElements(using = "css", value = ".styles__page-link___3Vvj-")
+tab_names = map(tabs, ~ .$getElementText()[[1]])
+tab_names
+tabs[[3]]$clickElement()
+webinar1_email_obj2 = remDr$findElements(using = "css", value = ".rt-td a")
+webinar_email_list2 = map(webinar1_email_obj2, ~.$getElementText()[[1]])
+head(webinar_email_list2)
+head(webinar_email_list)
+# remDr$goBack()
+# remDr$screenshot(display=TRUE)
+```
+
+
+##### list only the desired webinars
+
+```{r}
+past_webinars[[1]]$clickElement()
+past_webinars[[1]]$screenshot(display=TRUE)
+
+for(i in 1:length(webinars)){
+    webinars[[i]]$clickElement()
+    Sys.sleep(2)
+    #do something and go back to previous page
+    driver$goBack()
+    Sys.sleep(1)
+    # refresh the elements
+    elements <- driver$findElements(using = "css",".nav-list ul a")
+}
+```
+
+
+```{r}
+webinar = NULL
+for (i in 1:length(remDr$findElements(using = "css", ".stickyName a"))) {
+  if ((remDr$findElements(using = "css", ".stickyName a")$getElementText()[[1]]) == "NYMC Homebuyer Education Webinar (Fall Series)") {
+    webinar[[i]] = remDr$findElement(using = "css", paste0(".rt-tr-group:nth-child(", i, ") a"))
+  }
+}
+
+webinar1 = remDr$findElement(using = "css", ".rt-tr-group:nth-child(1) a")
+webinar1$getElementText()[[1]]
+
+webinar1$clickElement()
+webinar1$screenshot(display=TRUE)
+
+map(webinar, ~.$getElementText()[[1]])
+webinar[[1]]$getElementText()[[1]]
+webinar[[1]]$clickElement()
+```
+
 
 
 
